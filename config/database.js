@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs-extra');
 
@@ -7,15 +7,54 @@ const DB_PATH = path.join(__dirname, '../HMOS-APP.db');
 // 确保数据库目录存在
 fs.ensureDirSync(path.dirname(DB_PATH));
 
-const db = new sqlite3.Database(DB_PATH);
+const db = new Database(DB_PATH);
+
+// 数据库操作包装器
+const dbWrapper = {
+  run: (sql, params = []) => {
+    try {
+      const stmt = db.prepare(sql);
+      return stmt.run(params);
+    } catch (error) {
+      console.error('Database run error:', error);
+      throw error;
+    }
+  },
+  
+  get: (sql, params = [], callback) => {
+    try {
+      const stmt = db.prepare(sql);
+      const result = stmt.get(params);
+      if (callback) callback(null, result);
+      return result;
+    } catch (error) {
+      console.error('Database get error:', error);
+      if (callback) callback(error);
+      throw error;
+    }
+  },
+  
+  all: (sql, params = [], callback) => {
+    try {
+      const stmt = db.prepare(sql);
+      const results = stmt.all(params);
+      if (callback) callback(null, results);
+      return results;
+    } catch (error) {
+      console.error('Database all error:', error);
+      if (callback) callback(error);
+      throw error;
+    }
+  }
+};
 
 // 初始化数据库
 async function initDatabase() {
-  return new Promise((resolve, reject) => {
+  try {
     console.log('正在初始化数据库...');
     
     // 创建用户表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId TEXT UNIQUE NOT NULL,
@@ -34,7 +73,7 @@ async function initDatabase() {
     `);
     
     // 创建内容表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS contents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
@@ -51,7 +90,7 @@ async function initDatabase() {
     `);
     
     // 创建应用表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS apps (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
@@ -74,7 +113,7 @@ async function initDatabase() {
     `);
     
     // 创建留言表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
@@ -87,7 +126,7 @@ async function initDatabase() {
     `);
     
     // 创建通知表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -99,7 +138,7 @@ async function initDatabase() {
     `);
     
     // 创建代办事项表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
@@ -115,7 +154,7 @@ async function initDatabase() {
     `);
     
     // 创建分类表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         type TEXT NOT NULL,
@@ -125,7 +164,7 @@ async function initDatabase() {
     `);
     
     // 创建日志表
-    db.run(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         level TEXT NOT NULL,
@@ -135,16 +174,13 @@ async function initDatabase() {
         source TEXT DEFAULT 'system',
         createTime DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, (err) => {
-      if (err) {
-        console.error('数据库初始化失败:', err);
-        reject(err);
-      } else {
-        console.log('数据库初始化成功');
-        resolve();
-      }
-    });
-  });
+    `);
+    
+    console.log('数据库初始化成功');
+  } catch (error) {
+    console.error('数据库初始化失败:', error);
+    throw error;
+  }
 }
 
-module.exports = { db, initDatabase };
+module.exports = { db: dbWrapper, initDatabase };
