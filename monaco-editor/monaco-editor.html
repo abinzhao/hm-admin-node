@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Monaco 代码编辑器 - 简洁版</title>
+    <meta name="description" content="现代化的Monaco代码编辑器，中文界面，简洁设计" />
+    <meta name="keywords" content="Monaco编辑器,代码编辑器,JavaScript,TypeScript,在线编辑器" />
+
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="./monaco-editor.css" as="style" />
+    <link rel="preload" href="./monaco-editor.js" as="script" />
+
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="./monaco-editor.css" />
+
+    <!-- 图标和主题色 -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>" />
+    <meta name="theme-color" content="#00d9ff" />
+
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+  </head>
+
+  <body>
+    <!-- 主编辑器布局 -->
+    <div class="editor-layout" id="editor-layout">
+      <!-- 编辑器主容器 -->
+      <main class="editor-container" id="editor-container" role="main">
+        <!-- 加载动画覆盖层 -->
+        <div class="loading-overlay" id="loading-overlay" aria-live="polite">
+          <div class="loading-content">
+            <div class="loading-spinner" aria-hidden="true">
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+            </div>
+            <div class="loading-text">正在初始化 Monaco 编辑器...</div>
+            <div class="loading-progress" role="progressbar" aria-label="加载进度">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monaco编辑器挂载点 -->
+        <div id="monaco-editor" role="textbox" aria-label="代码编辑器"></div>
+      </main>
+
+      <!-- 底部状态栏 -->
+      <footer class="status-bar" id="status-bar" role="contentinfo">
+        <div class="status-left">
+          <div class="status-item">
+            <span class="status-icon" aria-hidden="true">📄</span>
+            <span class="status-text"> 文件: <span id="status-filename">未命名.js</span> </span>
+          </div>
+          <div class="status-item">
+            <span class="status-icon" aria-hidden="true">📏</span>
+            <span class="status-text"> 大小: <span id="status-size">0 字节</span> </span>
+          </div>
+          <div class="status-item mobile-hidden">
+            <span class="status-icon" aria-hidden="true">🔤</span>
+            <span class="status-text">UTF-8</span>
+          </div>
+        </div>
+
+        <div class="status-right">
+          <div class="status-item">
+            <span class="status-icon" aria-hidden="true">📍</span>
+            <span class="status-text">
+              行 <span id="status-line">1</span>, 列 <span id="status-column">1</span>
+            </span>
+          </div>
+          <div class="status-item mobile-hidden">
+            <span class="status-icon" aria-hidden="true">📊</span>
+            <span class="status-text"> 已选: <span id="status-selection">0</span> </span>
+          </div>
+          <div class="status-item mobile-hidden">
+            <span class="status-icon" aria-hidden="true">⚡</span>
+            <span class="status-text">Monaco v2.0</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notification-container" class="notification-container" aria-live="polite"></div>
+
+    <!-- 离线提示 -->
+    <div id="offline-indicator" class="offline-indicator" style="display: none">
+      <span class="offline-icon">📵</span>
+      <span class="offline-text">网络连接已断开</span>
+    </div>
+
+    <!-- 键盘快捷键帮助 (隐藏的无障碍信息) -->
+    <div id="keyboard-help" class="sr-only" aria-live="polite">
+      <h2>键盘快捷键</h2>
+      <ul>
+        <li>Ctrl+S: 保存文件</li>
+        <li>Ctrl+Shift+F: 格式化代码</li>
+        <li>Ctrl+/: 切换行注释</li>
+        <li>F11: 全屏模式</li>
+        <li>Ctrl+F: 查找文本</li>
+        <li>Ctrl+H: 查找和替换</li>
+        <li>Ctrl+Z: 撤销</li>
+        <li>Ctrl+Y: 重做</li>
+      </ul>
+    </div>
+
+    <!-- 核心JavaScript文件 -->
+    <script src="./monaco-editor.js"></script>
+
+    <!-- 离线检测脚本 -->
+    <script>
+      // 网络状态检测
+      function updateOnlineStatus() {
+        const indicator = document.getElementById("offline-indicator");
+        if (navigator.onLine) {
+          indicator.style.display = "none";
+        } else {
+          indicator.style.display = "flex";
+        }
+      }
+
+      // 监听网络状态变化
+      window.addEventListener("online", updateOnlineStatus);
+      window.addEventListener("offline", updateOnlineStatus);
+
+      // 初始检查
+      updateOnlineStatus();
+
+      // 性能监控
+      window.addEventListener("load", () => {
+        if ("performance" in window) {
+          const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+          console.log(`🚀 页面加载完成，耗时: ${loadTime}ms`);
+        }
+      });
+
+      // 错误捕获
+      window.addEventListener("error", (e) => {
+        console.error("💥 全局错误:", e.error);
+        if (window.monaco_editor && window.monaco_editor.showNotification) {
+          window.monaco_editor.showNotification("发生了一个错误，请查看控制台", "error");
+        }
+      });
+
+      // 未处理的Promise错误
+      window.addEventListener("unhandledrejection", (e) => {
+        console.error("💥 未处理的Promise错误:", e.reason);
+        if (window.monaco_editor && window.monaco_editor.showNotification) {
+          window.monaco_editor.showNotification("异步操作发生错误", "error");
+        }
+      });
+    </script>
+  </body>
+</html>
