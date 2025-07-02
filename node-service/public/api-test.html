@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HM程序员社区 - API测试中心</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <style>
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .api-section {
+        transition: all 0.3s ease;
+      }
+      .api-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      .request-body {
+        background: #1e293b;
+        color: #e2e8f0;
+      }
+      .response-body {
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      .success-response {
+        border-left: 4px solid #22c55e;
+      }
+      .error-response {
+        border-left: 4px solid #ef4444;
+      }
+      .json-highlight {
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+      <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <i class="fas fa-code text-3xl"></i>
+            <div>
+              <h1 class="text-2xl font-bold">HM程序员社区</h1>
+              <p class="text-purple-200">API测试中心</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span id="server-status" class="flex items-center">
+              <i class="fas fa-circle text-green-300 mr-2"></i>
+              <span class="text-sm">服务器在线</span>
+            </span>
+            <button
+              onclick="window.open('/api-docs', '_blank')"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors">
+              <i class="fas fa-book mr-2"></i>API文档
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+      <div class="container mx-auto px-6">
+        <div class="flex space-x-1 overflow-x-auto">
+          <button
+            onclick="showSection('auth')"
+            class="nav-btn px-6 py-3 text-gray-600 hover:text-purple-600 border-b-2 border-transparent hover:border-purple-600 transition-colors whitespace-nowrap">
+            <i class="fas fa-user-shield mr-2"></i>用户认证
+          </button>
+          <button
+            onclick="showSection('content')"
+            class="nav-btn px-6 py-3 text-gray-600 hover:text-purple-600 border-b-2 border-transparent hover:border-purple-600 transition-colors whitespace-nowrap">
+            <i class="fas fa-file-alt mr-2"></i>内容管理
+          </button>
+          <button
+            onclick="showSection('interaction')"
+            class="nav-btn px-6 py-3 text-gray-600 hover:text-purple-600 border-b-2 border-transparent hover:border-purple-600 transition-colors whitespace-nowrap">
+            <i class="fas fa-heart mr-2"></i>内容互动
+          </button>
+          <button
+            onclick="showSection('admin')"
+            class="nav-btn px-6 py-3 text-gray-600 hover:text-purple-600 border-b-2 border-transparent hover:border-purple-600 transition-colors whitespace-nowrap">
+            <i class="fas fa-cog mr-2"></i>系统管理
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Token Display -->
+    <div class="container mx-auto px-6 py-4">
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-gray-700"><i class="fas fa-key mr-2"></i>认证令牌</h3>
+          <div class="flex space-x-2">
+            <button onclick="clearToken()" class="text-red-500 hover:text-red-700 text-sm">
+              <i class="fas fa-trash mr-1"></i>清除
+            </button>
+            <button onclick="copyToken()" class="text-blue-500 hover:text-blue-700 text-sm">
+              <i class="fas fa-copy mr-1"></i>复制
+            </button>
+          </div>
+        </div>
+        <div class="mt-2">
+          <input
+            type="text"
+            id="auth-token"
+            placeholder="登录后自动填充，或手动输入JWT令牌"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 pb-12">
+      <!-- 用户认证部分 -->
+      <div id="auth-section" class="section">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-user-shield mr-3 text-purple-600"></i>用户认证 API
+        </h2>
+        <div class="grid gap-6">
+          <!-- 用户注册 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">用户注册</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">创建新用户账户，注册成功后直接返回JWT令牌</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="request-body rounded-lg p-4">
+                  <pre class="json-highlight text-sm" id="register-request">
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "123456",
+  "nickname": "测试用户",
+  "phone": "13800138000"
+}</pre
+                  >
+                </div>
+                <div class="mt-4 flex space-x-2">
+                  <button
+                    onclick="sendRequest('register')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                  <button
+                    onclick="editJson('register-request')"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-edit mr-2"></i>编辑
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="register-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户登录 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">用户登录</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">
+              使用邮箱和密码登录系统，默认管理员账户：admin@hm.com / 123456
+            </p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="request-body rounded-lg p-4">
+                  <pre class="json-highlight text-sm" id="login-request">
+{
+  "email": "admin@hm.com",
+  "password": "123456"
+}</pre
+                  >
+                </div>
+                <div class="mt-4 flex space-x-2">
+                  <button
+                    onclick="sendRequest('login')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                  <button
+                    onclick="editJson('login-request')"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-edit mr-2"></i>编辑
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="login-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 获取用户信息 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">获取当前用户信息</h3>
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                >GET</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">获取当前登录用户的详细信息（需要认证令牌）</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求说明</h4>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    此接口需要在请求头中包含认证令牌<br />
+                    Header: Authorization: Bearer {token}
+                  </p>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('profile')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="profile-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户登出 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">用户登出</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">退出登录状态</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求说明</h4>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    此接口需要认证令牌，登出后令牌将失效
+                  </p>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('logout')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="logout-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内容管理部分 -->
+      <div id="content-section" class="section hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-file-alt mr-3 text-purple-600"></i>内容管理 API
+        </h2>
+        <div class="grid gap-6">
+          <!-- 获取内容列表 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">获取内容列表</h3>
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                >GET</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">分页获取内容列表，支持类型、分类、标签等筛选条件</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">查询参数</h4>
+                <div class="space-y-3">
+                  <div class="flex space-x-2">
+                    <select id="content-type" class="border rounded px-3 py-1 text-sm">
+                      <option value="">所有类型</option>
+                      <option value="article">文章</option>
+                      <option value="question">问答</option>
+                      <option value="snippet">代码片段</option>
+                    </select>
+                    <input
+                      type="number"
+                      id="content-page"
+                      placeholder="页码"
+                      min="1"
+                      value="1"
+                      class="border rounded px-3 py-1 text-sm w-20" />
+                    <input
+                      type="number"
+                      id="content-limit"
+                      placeholder="每页数量"
+                      min="1"
+                      max="50"
+                      value="10"
+                      class="border rounded px-3 py-1 text-sm w-24" />
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('contentList')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="contentList-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 创建内容 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">创建内容</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">创建新的内容（文章、问答或代码片段）</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="request-body rounded-lg p-4">
+                  <pre class="json-highlight text-sm" id="createContent-request">
+{
+  "title": "JavaScript异步编程详解",
+  "content": "# JavaScript异步编程\n\n异步编程是JavaScript的重要特性...",
+  "type": "article",
+  "categoryId": 1,
+  "tags": ["JavaScript", "异步编程", "Promise"],
+  "summary": "本文详细介绍了JavaScript中的异步编程概念和实践"
+}</pre
+                  >
+                </div>
+                <div class="mt-4 flex space-x-2">
+                  <button
+                    onclick="sendRequest('createContent')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                  <button
+                    onclick="editJson('createContent-request')"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-edit mr-2"></i>编辑
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="createContent-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 获取内容详情 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">获取内容详情</h3>
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                >GET</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">根据ID获取内容详情</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm text-gray-600 mb-1">内容ID</label>
+                    <input
+                      type="number"
+                      id="content-id"
+                      placeholder="请输入内容ID"
+                      min="1"
+                      value="1"
+                      class="w-full border rounded px-3 py-2 text-sm" />
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('contentDetail')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>发送请求
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="contentDetail-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内容互动部分 -->
+      <div id="interaction-section" class="section hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-heart mr-3 text-purple-600"></i>内容互动 API
+        </h2>
+        <div class="grid gap-6">
+          <!-- 点赞/取消点赞 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">点赞/取消点赞</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">对内容进行点赞或取消点赞操作</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm text-gray-600 mb-1">内容ID</label>
+                    <input
+                      type="number"
+                      id="like-content-id"
+                      placeholder="请输入内容ID"
+                      min="1"
+                      value="1"
+                      class="w-full border rounded px-3 py-2 text-sm" />
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('likeContent')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-heart mr-2"></i>点赞
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="likeContent-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 收藏/取消收藏 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">收藏/取消收藏</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                >POST</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">对内容进行收藏或取消收藏操作</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求参数</h4>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm text-gray-600 mb-1">内容ID</label>
+                    <input
+                      type="number"
+                      id="favorite-content-id"
+                      placeholder="请输入内容ID"
+                      min="1"
+                      value="1"
+                      class="w-full border rounded px-3 py-2 text-sm" />
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('favoriteContent')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-star mr-2"></i>收藏
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="favoriteContent-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 系统管理部分 -->
+      <div id="admin-section" class="section hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-cog mr-3 text-purple-600"></i>系统管理 API
+        </h2>
+        <div class="grid gap-6">
+          <!-- 健康检查 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">系统健康检查</h3>
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                >GET</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">检查系统运行状态和基本信息</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求说明</h4>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    此接口用于检查服务器状态，无需认证
+                  </p>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('health')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-heartbeat mr-2"></i>检查状态
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="health-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 系统统计 -->
+          <div class="api-section bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-700">系统统计信息</h3>
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                >GET</span
+              >
+            </div>
+            <p class="text-gray-600 mb-4">获取系统统计数据（需要管理员权限）</p>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">请求说明</h4>
+                <div class="bg-yellow-50 rounded-lg p-4">
+                  <p class="text-sm text-yellow-800">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    此接口需要管理员权限，请使用管理员账户登录
+                  </p>
+                </div>
+                <div class="mt-4">
+                  <button
+                    onclick="sendRequest('stats')"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-chart-bar mr-2"></i>获取统计
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-700 mb-2">响应结果</h4>
+                <div id="stats-response" class="response-body rounded-lg p-4 min-h-32">
+                  <pre class="json-highlight text-sm">点击发送请求查看响应</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON编辑器模态框 -->
+    <div
+      id="json-editor-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+      <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-96">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold">编辑JSON数据</h3>
+          <button onclick="closeJsonEditor()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="p-4">
+          <textarea
+            id="json-editor-content"
+            class="w-full h-64 p-3 border rounded-lg font-mono text-sm resize-none"></textarea>
+          <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeJsonEditor()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+              取消
+            </button>
+            <button
+              onclick="saveJsonEdit()"
+              class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+              保存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentEditTarget = null;
+
+      // 页面加载时初始化
+      document.addEventListener("DOMContentLoaded", function () {
+        checkServerStatus();
+        showSection("auth");
+        setInterval(checkServerStatus, 30000); // 每30秒检查一次服务器状态
+      });
+
+      // 检查服务器状态
+      async function checkServerStatus() {
+        try {
+          const response = await fetch("/health");
+          if (response.ok) {
+            document.getElementById("server-status").innerHTML =
+              '<i class="fas fa-circle text-green-300 mr-2"></i><span class="text-sm">服务器在线</span>';
+          } else {
+            throw new Error("Server error");
+          }
+        } catch (error) {
+          document.getElementById("server-status").innerHTML =
+            '<i class="fas fa-circle text-red-300 mr-2"></i><span class="text-sm">服务器离线</span>';
+        }
+      }
+
+      // 显示指定的部分
+      function showSection(sectionName) {
+        // 隐藏所有部分
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.add("hidden");
+        });
+
+        // 重置所有导航按钮
+        document.querySelectorAll(".nav-btn").forEach((btn) => {
+          btn.classList.remove("text-purple-600", "border-purple-600");
+          btn.classList.add("text-gray-600", "border-transparent");
+        });
+
+        // 显示指定部分
+        document.getElementById(sectionName + "-section").classList.remove("hidden");
+
+        // 高亮当前导航按钮
+        event.target.classList.remove("text-gray-600", "border-transparent");
+        event.target.classList.add("text-purple-600", "border-purple-600");
+      }
+
+      // 发送API请求
+      async function sendRequest(type) {
+        const token = document.getElementById("auth-token").value;
+        let url,
+          method,
+          body,
+          headers = { "Content-Type": "application/json" };
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        switch (type) {
+          case "register":
+            url = "/api/auth/register";
+            method = "POST";
+            body = document.getElementById("register-request").textContent;
+            break;
+          case "login":
+            url = "/api/auth/login";
+            method = "POST";
+            body = document.getElementById("login-request").textContent;
+            break;
+          case "profile":
+            url = "/api/auth/profile";
+            method = "GET";
+            break;
+          case "logout":
+            url = "/api/auth/logout";
+            method = "POST";
+            break;
+          case "contentList":
+            const type_filter = document.getElementById("content-type").value;
+            const page = document.getElementById("content-page").value;
+            const limit = document.getElementById("content-limit").value;
+            const params = new URLSearchParams();
+            if (type_filter) params.append("type", type_filter);
+            if (page) params.append("page", page);
+            if (limit) params.append("limit", limit);
+            url = "/api/content" + (params.toString() ? "?" + params.toString() : "");
+            method = "GET";
+            break;
+          case "createContent":
+            url = "/api/content";
+            method = "POST";
+            body = document.getElementById("createContent-request").textContent;
+            break;
+          case "contentDetail":
+            const contentId = document.getElementById("content-id").value;
+            url = `/api/content/${contentId}`;
+            method = "GET";
+            break;
+          case "likeContent":
+            const likeContentId = document.getElementById("like-content-id").value;
+            url = `/api/content/${likeContentId}/like`;
+            method = "POST";
+            break;
+          case "favoriteContent":
+            const favoriteContentId = document.getElementById("favorite-content-id").value;
+            url = `/api/content/${favoriteContentId}/favorite`;
+            method = "POST";
+            break;
+          case "health":
+            url = "/health";
+            method = "GET";
+            break;
+          case "stats":
+            url = "/api/admin/stats";
+            method = "GET";
+            break;
+          default:
+            alert("未知的请求类型");
+            return;
+        }
+
+        try {
+          const options = {
+            method,
+            headers,
+          };
+
+          if (body && method !== "GET") {
+            options.body = body;
+          }
+
+          const response = await fetch(url, options);
+          const data = await response.json();
+
+          // 显示响应
+          const responseElement = document.getElementById(type + "-response");
+          responseElement.innerHTML = `<pre class="json-highlight text-sm">${JSON.stringify(data, null, 2)}</pre>`;
+
+          // 设置响应样式
+          if (response.ok) {
+            responseElement.className = "response-body rounded-lg p-4 min-h-32 success-response";
+          } else {
+            responseElement.className = "response-body rounded-lg p-4 min-h-32 error-response";
+          }
+
+          // 如果是登录成功，自动保存token
+          if (type === "login" && response.ok && data.data && data.data.accessToken) {
+            document.getElementById("auth-token").value = data.data.accessToken;
+            showNotification("登录成功，已自动保存认证令牌", "success");
+          }
+
+          // 如果是登出成功，清除token
+          if (type === "logout" && response.ok) {
+            document.getElementById("auth-token").value = "";
+            showNotification("已登出，认证令牌已清除", "info");
+          }
+        } catch (error) {
+          const responseElement = document.getElementById(type + "-response");
+          responseElement.innerHTML = `<pre class="json-highlight text-sm">请求失败: ${error.message}</pre>`;
+          responseElement.className = "response-body rounded-lg p-4 min-h-32 error-response";
+          showNotification("请求失败: " + error.message, "error");
+        }
+      }
+
+      // 编辑JSON数据
+      function editJson(elementId) {
+        currentEditTarget = elementId;
+        const content = document.getElementById(elementId).textContent;
+        document.getElementById("json-editor-content").value = content;
+        document.getElementById("json-editor-modal").classList.remove("hidden");
+      }
+
+      // 关闭JSON编辑器
+      function closeJsonEditor() {
+        document.getElementById("json-editor-modal").classList.add("hidden");
+        currentEditTarget = null;
+      }
+
+      // 保存JSON编辑
+      function saveJsonEdit() {
+        if (!currentEditTarget) return;
+
+        const content = document.getElementById("json-editor-content").value;
+        try {
+          // 验证JSON格式
+          JSON.parse(content);
+          document.getElementById(currentEditTarget).textContent = content;
+          closeJsonEditor();
+          showNotification("JSON数据已更新", "success");
+        } catch (error) {
+          showNotification("JSON格式错误: " + error.message, "error");
+        }
+      }
+
+      // 清除token
+      function clearToken() {
+        document.getElementById("auth-token").value = "";
+        showNotification("认证令牌已清除", "info");
+      }
+
+      // 复制token
+      function copyToken() {
+        const token = document.getElementById("auth-token").value;
+        if (!token) {
+          showNotification("没有可复制的令牌", "warning");
+          return;
+        }
+
+        navigator.clipboard
+          .writeText(token)
+          .then(() => {
+            showNotification("令牌已复制到剪贴板", "success");
+          })
+          .catch(() => {
+            showNotification("复制失败", "error");
+          });
+      }
+
+      // 显示通知
+      function showNotification(message, type = "info") {
+        const colors = {
+          success: "bg-green-500",
+          error: "bg-red-500",
+          warning: "bg-yellow-500",
+          info: "bg-blue-500",
+        };
+
+        const notification = document.createElement("div");
+        notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // 显示通知
+        setTimeout(() => {
+          notification.classList.remove("translate-x-full");
+        }, 100);
+
+        // 3秒后隐藏通知
+        setTimeout(() => {
+          notification.classList.add("translate-x-full");
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
+      }
+
+      // 处理点击事件委托
+      document.addEventListener("click", function (e) {
+        // 如果点击的是导航按钮
+        if (e.target.closest(".nav-btn")) {
+          const btn = e.target.closest(".nav-btn");
+          const onclick = btn.getAttribute("onclick");
+          if (onclick) {
+            // 重置所有按钮状态
+            document.querySelectorAll(".nav-btn").forEach((navBtn) => {
+              navBtn.classList.remove("text-purple-600", "border-purple-600");
+              navBtn.classList.add("text-gray-600", "border-transparent");
+            });
+
+            // 设置当前按钮状态
+            btn.classList.remove("text-gray-600", "border-transparent");
+            btn.classList.add("text-purple-600", "border-purple-600");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

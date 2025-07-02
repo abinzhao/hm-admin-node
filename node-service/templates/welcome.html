@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎加入 - HM程序员社区</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .tips {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 480px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🎉 欢迎来到HM程序员社区！</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">您的编程之旅从这里开始</p>
+        </div>
+        
+        <div class="content">
+            <h2>您好，{{nickname}}！</h2>
+            
+            <p>🎊 恭喜您成功注册HM程序员社区！我们很高兴您成为我们大家庭的一员。</p>
+            
+            <p>HM程序员社区是一个专注于程序员成长与技术分享的平台，这里聚集了众多优秀的开发者，您可以在这里学习、分享、成长。</p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">📝</div>
+                    <h3>技术文章</h3>
+                    <p>分享您的技术心得和项目经验</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">❓</div>
+                    <h3>问答社区</h3>
+                    <p>提问解答，互帮互助共同成长</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💻</div>
+                    <h3>代码片段</h3>
+                    <p>收集和分享实用的代码片段</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <h3>应用分享</h3>
+                    <p>展示您的应用作品获得反馈</p>
+                </div>
+            </div>
+            
+            <div class="cta-section">
+                <h3>🚀 开始您的社区之旅</h3>
+                <p>现在就开始探索和分享吧！</p>
+                <a href="{{frontendUrl}}" class="button">进入社区</a>
+                <a href="{{frontendUrl}}/profile" class="button">完善资料</a>
+            </div>
+            
+            <div class="tips">
+                <h3>💡 新手指南</h3>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>完善个人资料</strong>：添加头像、个人简介，让其他用户更好地了解您</li>
+                    <li><strong>关注感兴趣的用户</strong>：关注技术大牛，获取最新的技术动态</li>
+                    <li><strong>参与讨论</strong>：在文章和问题下方积极评论，建立您的影响力</li>
+                    <li><strong>分享知识</strong>：发布您的第一篇技术文章或代码片段</li>
+                    <li><strong>遵守社区规范</strong>：保持友好交流，共同维护良好的社区氛围</li>
+                </ul>
+            </div>
+            
+            <h3>🏆 社区等级系统</h3>
+            <p>通过发布优质内容、积极参与讨论，您可以获得经验值提升等级：</p>
+            <ul>
+                <li>🌱 新手 (0-999经验)</li>
+                <li>🌿 初级 (1000-2999经验)</li>
+                <li>🌳 中级 (3000-6999经验)</li>
+                <li>🏅 高级 (7000-14999经验)</li>
+                <li>👑 专家 (15000+经验)</li>
+            </ul>
+            
+            <p>如果您在使用过程中遇到任何问题，请随时联系我们：</p>
+            <ul>
+                <li>📧 邮箱：support@hmcode.community</li>
+                <li>💬 在线客服：社区内私信@官方客服</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>感谢您加入HM程序员社区！</p>
+            <p>© 2024 HM程序员社区 - 专注于程序员成长与技术分享</p>
+            <p>如果您不想收到此类邮件，请在设置中关闭邮件通知。</p>
+        </div>
+    </div>
+</body>
+</html> 
