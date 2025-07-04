@@ -3,11 +3,15 @@ name: Deploy to Aliyun
 on:
   push:
     branches:
-      - master # 只在 master 分支 push 时触发
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      REMOTE_HOST: 8.140.239.170
+      REMOTE_USER: abinzhao
+      REMOTE_DIR: /var/node-service-app/hm-admin-node
 
     steps:
       - name: Checkout code
@@ -18,10 +22,25 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.ALIYUN_SSH_PRIVATE_KEY }}
 
+      - name: Debug SSH connection
+        run: |
+          # 显示私钥是否正确加载
+          ssh-add -l
+          
+          # 详细的 SSH 连接测试
+          ssh -v \
+            -o StrictHostKeyChecking=no \
+            -o PubkeyAuthentication=yes \
+            -o PasswordAuthentication=no \
+            ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} 'echo "SSH connection successful"'
+        continue-on-error: true  # 允许失败，继续后续步骤以便获取更多信息
+
       - name: Deploy to Aliyun
         run: |
-          ssh -o StrictHostKeyChecking=no abinzhao@8.140.239.170 "
-            cd /var/node-service-app/hm-admin-node &&
+          ssh -o StrictHostKeyChecking=no \
+            ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "
+            set -e
+            cd ${{ env.REMOTE_DIR }} &&
             git pull &&
             pnpm install &&
             pm2 reload ecosystem.config.js --env production
