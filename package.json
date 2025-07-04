@@ -1,28 +1,23 @@
 {
-  "name": "hmos-backend-server",
-  "version": "1.0.0",
-  "description": "HMOS应用后台服务器",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "build": "webpack --mode production",
-    "build:frontend": "cd frontend && npm run build"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "better-sqlite3": "^8.7.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
-    "cors": "^2.8.5",
-    "body-parser": "^1.20.2",
-    "fs-extra": "^11.1.1",
-    "winston": "^3.11.0",
-    "winston-daily-rotate-file": "^4.7.1",
-    "moment": "^2.29.4"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+    "name": "node-backend-demo",
+    "version": "1.0.0",
+    "description": "Node.js + MySQL 后台服务 DEMO，支持用户、内容、软件、评论、通知、代办事项、文件上传等模块。",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "sequelize": "^6.32.1",
+        "mysql2": "^3.6.0",
+        "jsonwebtoken": "^9.0.2",
+        "multer": "^1.4.5-lts.1",
+        "dotenv": "^16.3.1",
+        "express-rate-limit": "^6.7.0",
+        "bcryptjs": "^3.0.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
 }
