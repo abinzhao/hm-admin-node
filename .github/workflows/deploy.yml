@@ -1,0 +1,28 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches:
+      - master # 只在 master 分支 push 时触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.ALIYUN_SSH_PRIVATE_KEY }}
+
+      - name: Deploy to Aliyun
+        run: |
+          ssh -o StrictHostKeyChecking=no abinzhao@8.140.239.170 "
+            cd /var/node-service-app/hm-admin-node &&
+            git pull &&
+            pnpm install &&
+            pm2 reload ecosystem.config.js --env production
+          "
