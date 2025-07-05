@@ -5,7 +5,8 @@
     "main": "app.js",
     "scripts": {
         "start": "node app.js",
-        "dev": "nodemon app.js"
+        "dev": "nodemon app.js",
+        "publish": "git pull && pnpm install && pm2 reload ecosystem.config.js --env production"
     },
     "dependencies": {
         "express": "^4.18.2",

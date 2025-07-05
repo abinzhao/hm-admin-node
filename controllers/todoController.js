@@ -19,13 +19,6 @@ exports.createTodo = async (req, res) => {
     const { user_id, title, description, status, priority, deadline } = req.body;
     if (!user_id || !title) return res.fail("user_id、title为必填项");
     const todo = await Todo.create({ user_id, title, description, status, priority, deadline });
-    await logOperation({
-      user_id,
-      action: "create",
-      target_type: "todo",
-      target_id: todo.id,
-      detail: JSON.stringify({ title, description, status, priority, deadline }),
-    });
     res.success(todo, "代办事项创建成功");
   } catch (err) {
     res.fail("代办事项创建失败");
@@ -46,13 +39,6 @@ exports.updateTodo = async (req, res) => {
     const todo = await Todo.findByPk(id);
     if (!todo) return res.fail("事项不存在");
     await todo.update(fields);
-    await logOperation({
-      user_id: todo.user_id,
-      action: "update",
-      target_type: "todo",
-      target_id: id,
-      detail: JSON.stringify(fields),
-    });
     res.success(todo, "代办事项更新成功");
   } catch (err) {
     res.fail("代办事项更新失败");
@@ -71,13 +57,6 @@ exports.deleteTodo = async (req, res) => {
     if (!id) return res.fail("缺少事项ID");
     const todo = await Todo.findByPk(id);
     if (!todo) return res.fail("事项不存在");
-    await logOperation({
-      user_id: todo.user_id,
-      action: "delete",
-      target_type: "todo",
-      target_id: id,
-      detail: JSON.stringify(todo),
-    });
     await todo.destroy(); // 硬删除
     res.success({}, "代办事项删除成功");
   } catch (err) {
