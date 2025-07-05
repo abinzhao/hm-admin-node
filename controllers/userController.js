@@ -14,12 +14,15 @@ const bcrypt = require("bcryptjs");
  * @param {string} avatar 头像（可选）
  * @param {string} homepage 个人主页（可选）
  * @param {string} tags 标签（可选）
+ * @param {string} huawei_unionid huawei_openid（可选）
+ * @param {string} huawei_openid huawei_openid（可选）
+ * @param {string} huawei_authorizationCode huawei_authorizationCode（可选）
  * @Time O(1)
  * @Space O(1)
  */
 exports.register = async (req, res) => {
   try {
-    const { username, password, email, phone, nickname, avatar, homepage, tags } = req.body;
+    const { username, password, email, phone, nickname, avatar, homepage, tags, huawei_unionid,huawei_openid,huawei_authorizationCode } = req.body;
     // 防御性编程：参数校验
     if (!username || !password) return res.fail("用户名和密码必填");
     // 检查用户名是否已存在
@@ -37,6 +40,9 @@ exports.register = async (req, res) => {
       avatar,
       homepage,
       tags,
+      huawei_openid,
+      huawei_unionid,
+      huawei_authorizationCode
     });
     res.success({ id: user.id, username: user.username }, "注册成功");
   } catch (err) {
@@ -69,13 +75,7 @@ exports.login = async (req, res) => {
     res.success(
       {
         token,
-        user: {
-          id: user.id,
-          username: user.username,
-          nickname: user.nickname,
-          avatar: user.avatar,
-          role: user.role,
-        },
+        user,
       },
       "登录成功"
     );
