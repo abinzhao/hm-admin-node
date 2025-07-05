@@ -99,7 +99,7 @@ exports.deleteTodo = async (req, res) => {
 exports.queryTodo = async (req, res) => {
   try {
     const { user_id, status, priority, page = 1, pageSize = 10 } = req.query;
-    const where = { status: 0 };
+    const where = { status: 'completed' };
     if (user_id) where.user_id = user_id;
     if (status) where.status = status;
     if (priority) where.priority = priority;

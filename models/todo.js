@@ -10,7 +10,11 @@ const Todo = sequelize.define(
     user_id: { type: DataTypes.BIGINT, allowNull: false, comment: "所属用户ID" },
     title: { type: DataTypes.STRING(100), allowNull: false, comment: "标题" },
     description: { type: DataTypes.STRING(255), allowNull: true, comment: "详情" },
-    status: { type: DataTypes.TINYINT, defaultValue: 0, comment: "状态（0正常，1删除）" },
+    status: {
+      type: DataTypes.ENUM("completed", "inProgress", "notStarted"),
+      defaultValue: "completed",
+      comment: "状态",
+    },
     priority: {
       type: DataTypes.ENUM("low", "medium", "high", "urgent"),
       defaultValue: "medium",
